@@ -1,0 +1,28 @@
+services:
+  revisador-casos-clinicos:
+    build:
+      context: .
+      args:
+        - GIT_EMAIL=your-email@example.com
+        - GIT_NAME=Your Name
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./.env:/app/.env
+    restart: unless-stopped
+    
+  echo-branch:
+    build:
+      context: .
+    env_file:
+      - .env
+    volumes:
+      - ./.env:/app/.env
+      - ./echo-branch.sh:/app/echo-branch.sh
+    entrypoint: ["/bin/bash", "-c", "chmod +x /app/echo-branch.sh && /app/echo-branch.sh"]
+    volumes_from:
+      - revisador-casos-clinicos:ro
+    depends_on:
+      - revisador-casos-clinicos
