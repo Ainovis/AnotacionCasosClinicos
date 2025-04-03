@@ -24,32 +24,58 @@ fi
 # Guardar el nombre del branch para uso posterior
 echo $BRANCH_NAME > /app/branch_name.txt
 
-echo "Clonando repositorio desde commit $COMMIT_HASH..."
-git clone $REPO_URL revisadorCasosClinicos
-cd revisadorCasosClinicos
-
-# Checkout al commit específico
-git checkout $COMMIT_HASH
-
-# Instalar dependencias del proyecto
-echo "Instalando dependencias de Node.js..."
-npm install --force
-
-# Crear y cambiar al nuevo branch
-git checkout -b $BRANCH_NAME
-
-# Configurar credenciales de GitHub si se proporcionan como variables de entorno
-if [ ! -z "$GITHUB_TOKEN" ]; then
-    # Configurar las credenciales usando el token
-    git config --global credential.helper store
-    echo "https://${GITHUB_TOKEN}@github.com" > ~/.git-credentials
+# Verificar si el repositorio ya fue clonado
+if [ ! -d "/app/revisadorCasosClinicos" ]; then
+    echo "Clonando repositorio desde commit $COMMIT_HASH..."
+    git clone $REPO_URL revisadorCasosClinicos
+    cd revisadorCasosClinicos
     
-    # Actualizar la URL del repositorio para usar HTTPS con token
-    git remote set-url origin "https://${GITHUB_TOKEN}@github.com/Ainovis/revisadorCasosClinicos.git"
-fi
+    # Checkout al commit específico
+    git checkout $COMMIT_HASH
+    
+    # Instalar dependencias del proyecto
+    echo "Instalando dependencias de Node.js..."
+    npm install --force
+    
+    # Crear y cambiar al nuevo branch
+    git checkout -b $BRANCH_NAME
+    
+    # Configurar credenciales de GitHub si se proporcionan como variables de entorno
+    if [ ! -z "$GITHUB_TOKEN" ]; then
+        # Configurar las credenciales usando el token
+        git config --global credential.helper store
+        echo "https://${GITHUB_TOKEN}@github.com" > ~/.git-credentials
+        
+        # Actualizar la URL del repositorio para usar HTTPS con token
+        git remote set-url origin "https://${GITHUB_TOKEN}@github.com/Ainovis/revisadorCasosClinicos.git"
+    fi
 
-# Copiando datos desde reg a pendientes TODO deberia ser desde fuera, y data/ deshardcodear
-cp data/reg/* data/pendientes
+    # Copiando datos desde reg a pendientes TODO deberia ser desde fuera, y data/ deshardcodear
+    cp data/reg/* data/pendientes
+else
+    echo "Repositorio ya existe, omitiendo clonación..."
+    cd /app/revisadorCasosClinicos
+    
+    # Verificar si el branch ya existe
+    if ! git show-ref --verify --quiet refs/heads/$BRANCH_NAME; then
+        echo "Creando nuevo branch $BRANCH_NAME..."
+        git checkout $COMMIT_HASH
+        git checkout -b $BRANCH_NAME
+        
+        # Configurar credenciales de GitHub si se proporcionan como variables de entorno
+        if [ ! -z "$GITHUB_TOKEN" ]; then
+            # Configurar las credenciales usando el token
+            git config --global credential.helper store
+            echo "https://${GITHUB_TOKEN}@github.com" > ~/.git-credentials
+            
+            # Actualizar la URL del repositorio para usar HTTPS con token
+            git remote set-url origin "https://${GITHUB_TOKEN}@github.com/Ainovis/revisadorCasosClinicos.git"
+        fi
+    else
+        echo "Usando branch existente $BRANCH_NAME..."
+        git checkout $BRANCH_NAME
+    fi
+fi
 
 echo "Iniciando el monitor de cambios en segundo plano..."
 /app/monitor-changes.sh &

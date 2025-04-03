@@ -11,6 +11,7 @@ services:
       - "3000:3000"
     volumes:
       - ./.env:/app/.env
+      - revisador_data:/app/revisadorCasosClinicos
     restart: unless-stopped
     
   echo-branch:
@@ -26,3 +27,6 @@ services:
       - revisador-casos-clinicos:ro
     depends_on:
       - revisador-casos-clinicos
+
+volumes:
+  revisador_data:
