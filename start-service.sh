@@ -24,8 +24,15 @@ fi
 # Guardar el nombre del branch para uso posterior
 echo $BRANCH_NAME > /app/branch_name.txt
 
-# Verificar si el repositorio ya fue clonado
-if [ ! -d "/app/revisadorCasosClinicos" ]; then
+# Verificar si el repositorio ya fue clonado (comprobación más robusta)
+if [ ! -d "/app/revisadorCasosClinicos/.git" ]; then
+    echo "Directorio Git no encontrado o está corrupto. Clonando repositorio..."
+    
+    # Si existe el directorio pero no es un repositorio git válido, lo eliminamos
+    if [ -d "/app/revisadorCasosClinicos" ]; then
+        rm -rf /app/revisadorCasosClinicos
+    fi
+    
     echo "Clonando repositorio desde commit $COMMIT_HASH..."
     git clone $REPO_URL revisadorCasosClinicos
     cd revisadorCasosClinicos
