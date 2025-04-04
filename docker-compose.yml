@@ -11,8 +11,6 @@ services:
       - "3000:3000"
     volumes:
       - ./.env:/app/.env
-      - revisador_data:/app/revisadorCasosClinicos
-    restart: unless-stopped
     
   echo-branch:
     build:
@@ -20,13 +18,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./.env:/app/.env
+      - ./.env:/app/.env:ro
       - ./echo-branch.sh:/app/echo-branch.sh
     entrypoint: ["/bin/bash", "-c", "chmod +x /app/echo-branch.sh && /app/echo-branch.sh"]
-    volumes_from:
-      - revisador-casos-clinicos:ro
     depends_on:
       - revisador-casos-clinicos
-
-volumes:
-  revisador_data:

@@ -6,8 +6,9 @@ if [ -f /app/.env ]; then
     export $(grep -v '^#' /app/.env | xargs)
 fi
 
-# Repositorio y commit específico (con valores por defecto)
+# Repositorio y punto de partida (branch o commit)
 REPO_URL=${REPO_URL:-"https://github.com/Ainovis/revisadorCasosClinicos.git"}
+SOURCE_BRANCH=${SOURCE_BRANCH:-""}
 COMMIT_HASH=${COMMIT_HASH:-"c4cf5166f7445b7983daab12ac0fe0b01886c7f0"}
 
 # Generar un nombre único para el branch
@@ -21,24 +22,24 @@ else
     BRANCH_NAME="docker-instance-${INSTANCE_ID}"
 fi
 
-# Guardar el nombre del branch para uso posterior
-echo $BRANCH_NAME > /app/branch_name.txt
+# echo $BRANCH_NAME
+# echo "BRANCH_NAME=${BRANCH_NAME}" >> /app/.env;
+# exit 0
 
-# Verificar si el repositorio ya fue clonado (comprobación más robusta)
-if [ ! -d "/app/revisadorCasosClinicos/.git" ]; then
-    echo "Directorio Git no encontrado o está corrupto. Clonando repositorio..."
-    
-    # Si existe el directorio pero no es un repositorio git válido, lo eliminamos
-    if [ -d "/app/revisadorCasosClinicos" ]; then
-        rm -rf /app/revisadorCasosClinicos
-    fi
-    
-    echo "Clonando repositorio desde commit $COMMIT_HASH..."
+# Verificar si el repositorio ya fue clonado
+if [ ! -d "/app/revisadorCasosClinicos" ]; then
+    echo "Clonando repositorio..."
     git clone $REPO_URL revisadorCasosClinicos
     cd revisadorCasosClinicos
     
-    # Checkout al commit específico
-    git checkout $COMMIT_HASH
+    # Checkout al branch origen o commit específico
+    if [ ! -z "$SOURCE_BRANCH" ]; then
+        echo "Usando branch origen: $SOURCE_BRANCH"
+        git checkout $SOURCE_BRANCH
+    else
+        echo "Usando commit específico: $COMMIT_HASH"
+        git checkout $COMMIT_HASH
+    fi
     
     # Instalar dependencias del proyecto
     echo "Instalando dependencias de Node.js..."
@@ -58,6 +59,7 @@ if [ ! -d "/app/revisadorCasosClinicos/.git" ]; then
     fi
 
     # Copiando datos desde reg a pendientes TODO deberia ser desde fuera, y data/ deshardcodear
+    mkdir -p data/pendientes data/correctas data/correcciones data/incompletos
     cp data/reg/* data/pendientes
 else
     echo "Repositorio ya existe, omitiendo clonación..."
@@ -66,7 +68,14 @@ else
     # Verificar si el branch ya existe
     if ! git show-ref --verify --quiet refs/heads/$BRANCH_NAME; then
         echo "Creando nuevo branch $BRANCH_NAME..."
-        git checkout $COMMIT_HASH
+        # Checkout al branch origen o commit específico
+        if [ ! -z "$SOURCE_BRANCH" ]; then
+            echo "Usando branch origen: $SOURCE_BRANCH"
+            git checkout $SOURCE_BRANCH
+        else
+            echo "Usando commit específico: $COMMIT_HASH"
+            git checkout $COMMIT_HASH
+        fi
         git checkout -b $BRANCH_NAME
         
         # Configurar credenciales de GitHub si se proporcionan como variables de entorno

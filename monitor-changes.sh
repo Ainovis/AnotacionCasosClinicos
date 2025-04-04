@@ -5,8 +5,12 @@ if [ -f /app/.env ]; then
     export $(grep -v '^#' /app/.env | xargs)
 fi
 
-# Obtener el nombre del branch
-BRANCH_NAME=$(cat /app/branch_name.txt)
+# Obtener el nombre del branch desde variables de entorno
+if [ -z "$BRANCH_NAME" ]; then
+    echo "Error: BRANCH_NAME no está definido. Finalizando el servicio de monitoreo."
+    exit 0
+fi
+
 cd /app/revisadorCasosClinicos
 
 # Función para hacer commit y push de cambios

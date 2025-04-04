@@ -1,13 +1,20 @@
 #!/bin/bash
 
-# Esperar a que el archivo con el nombre del branch exista
-while [ ! -f /app/branch_name.txt ]; do
+# while no definido "BRANCH_NAME" se espera a que se genere el nombre del branch
+while [ -z "$BRANCH_NAME" ]; do
+    if [ -f /app/.env ]; then
+        export $(grep -v '^#' /app/.env | xargs)
+    fi
     echo "Esperando a que se genere el nombre del branch..."
     sleep 10
 done
 
-# Leer el nombre del branch
-BRANCH_NAME=$(cat /app/branch_name.txt)
+
+# Verificar si BRANCH_NAME está definido PORSIACASO, con errores raros por \243 o asi a rita la pollera
+if [ -z "$BRANCH_NAME" ]; then
+    echo "Error: BRANCH_NAME no está definido. Finalizando el servicio."
+    exit 0
+fi
 
 # Obtener el repositorio desde .env si existe
 if [ -f /app/.env ]; then
@@ -25,8 +32,9 @@ echo "ENLACE AL BRANCH DE GITHUB:"
 echo $BRANCH_LINK
 echo "============================================"
 
+exit 0
 # Mantener el servicio en ejecución mostrando el enlace cada minuto
-while true; do
-    sleep 60
-    echo "ENLACE AL BRANCH DE GITHUB: $BRANCH_LINK"
-done
+# while true; do
+#     sleep 60
+#     echo "ENLACE AL BRANCH DE GITHUB: $BRANCH_LINK"
+# done
