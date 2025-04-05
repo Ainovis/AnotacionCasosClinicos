@@ -1,13 +1,17 @@
 #!/bin/bash
 
 # while no definido "BRANCH_NAME" se espera a que se genere el nombre del branch
-while [ -z "$BRANCH_NAME" ]; do
-    if [ -f /app/.env ]; then
-        export $(grep -v '^#' /app/.env | xargs)
-    fi
-    echo "Esperando a que se genere el nombre del branch..."
-    sleep 10
-done
+# while [ -z "$BRANCH_NAME" ]; do
+#     if [ -f /app/.env ]; then
+#         export $(grep -v '^#' /app/.env | xargs)
+#     fi
+#     echo "Esperando a que se genere el nombre del branch..."
+#     sleep 10
+# done
+if [ -f /app/.env ]; then
+    export $(grep -v '^#' /app/.env | xargs)
+fi
+BRANCH_NAME=${BRANCH_NAME:-"webapp"}
 
 
 # Verificar si BRANCH_NAME está definido PORSIACASO, con errores raros por \243 o asi a rita la pollera

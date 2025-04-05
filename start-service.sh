@@ -10,17 +10,18 @@ fi
 REPO_URL=${REPO_URL:-"https://github.com/Ainovis/revisadorCasosClinicos.git"}
 SOURCE_BRANCH=${SOURCE_BRANCH:-""}
 COMMIT_HASH=${COMMIT_HASH:-"c4cf5166f7445b7983daab12ac0fe0b01886c7f0"}
+BRANCH_NAME=${BRANCH_NAME:-"webapp"}
 
 # Generar un nombre único para el branch
-INSTANCE_ID=$(cat /proc/sys/kernel/random/uuid | cut -d'-' -f1)
+# INSTANCE_ID=$(cat /proc/sys/kernel/random/uuid | cut -d'-' -f1)
 
 # Verificar si hay un NAME en .env
-if [ -f .env ] && grep -q "^NAME=" .env; then
-    CUSTOM_NAME=$(grep "^NAME=" .env | cut -d'=' -f2)
-    BRANCH_NAME="docker-instance-${CUSTOM_NAME}-${INSTANCE_ID}"
-else
-    BRANCH_NAME="docker-instance-${INSTANCE_ID}"
-fi
+# if [ -f .env ] && grep -q "^NAME=" .env; then
+#     CUSTOM_NAME=$(grep "^NAME=" .env | cut -d'=' -f2)
+#     BRANCH_NAME="docker-instance-${CUSTOM_NAME}-${INSTANCE_ID}"
+# else
+#     BRANCH_NAME="docker-instance-${INSTANCE_ID}"
+# fi
 
 # echo $BRANCH_NAME
 # echo "BRANCH_NAME=${BRANCH_NAME}" >> /app/.env;

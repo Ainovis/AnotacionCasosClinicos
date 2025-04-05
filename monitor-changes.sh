@@ -6,10 +6,11 @@ if [ -f /app/.env ]; then
 fi
 
 # Obtener el nombre del branch desde variables de entorno
-if [ -z "$BRANCH_NAME" ]; then
-    echo "Error: BRANCH_NAME no está definido. Finalizando el servicio de monitoreo."
-    exit 0
-fi
+# if [ -z "$BRANCH_NAME" ]; then
+#     echo "Error: BRANCH_NAME no está definido. Finalizando el servicio de monitoreo."
+#     exit 0
+# fi
+BRANCH_NAME=${BRANCH_NAME:-"webapp"}
 
 cd /app/revisadorCasosClinicos
 
